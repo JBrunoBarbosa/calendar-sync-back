@@ -85,9 +85,13 @@ def horarios_vagos():
             'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
         }
 
+        print("1=============", response)
+        
         # Retorna a resposta como JSON
         resp = jsonify(response)
 
+        print("2=============", resp)
+        
         # Configura os cabeçalhos de resposta para permitir todas as origens (CORS)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Access-Control-Allow-Methods'] = 'POST'
