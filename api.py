@@ -87,8 +87,12 @@ def horarios_vagos():
 
         # Retorna a resposta como JSON
         resp = jsonify(response)
+        
+        # Configura os cabeçalhos de resposta para permitir todas as origens (CORS)
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Access-Control-Allow-Methods'] = 'POST'
 
-        print("--- %s seconds ---" % (time.time() - start_time))
+return resp
 
         return resp
     except Exception as e:
