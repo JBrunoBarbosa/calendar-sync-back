@@ -63,6 +63,9 @@ def processar_arquivo(arquivo):
     except Exception as e:
         print("Exception in processar_arquivo:", str(e))
 
+    # Retorna um valor padrão para indicar que ocorreu um erro ao processar o arquivo
+    return None
+
 @app.route('/api/horarios-vagos', methods=['POST'])
 def horarios_vagos():
     start_time = time.time()
@@ -76,10 +79,10 @@ def horarios_vagos():
             if dados_aluno is not None:
                 dados_alunos.append(dados_aluno)
 
-        # Cria o DataFrame para exibir a tabela
-        df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
-
         if dados_alunos:
+            # Cria o DataFrame para exibir a tabela
+            df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
+
             # Converte o DataFrame em um dicionário
             response = {
                 'DadosAlunos': dados_alunos,
