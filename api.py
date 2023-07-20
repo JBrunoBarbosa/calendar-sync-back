@@ -21,7 +21,13 @@ def processar_arquivo(arquivo):
     global tabela_horarios_vagos
     file = arquivo.stream
     try:
-        df = tabula.read_pdf(file, pages='all')[0]
+        # Ler o PDF
+        dfs = tabula.read_pdf(file, pages='all')
+
+        if not dfs:
+            raise Exception("Nenhum dado encontrado no arquivo PDF.")
+
+        df = dfs[0]
         df = df.iloc[:, :-1]
         df = df.fillna('')
 
@@ -60,11 +66,12 @@ def processar_arquivo(arquivo):
 
             # Retorna o aluno e seus horários vagos
             return dados_aluno
+    except tabula.errors.NoPagesFound as e:
+        raise Exception("Nenhuma página encontrada no arquivo PDF.")
+    except tabula.errors.TooManyBoxesError as e:
+        raise Exception("Erro ao identificar caixas no arquivo PDF.")
     except Exception as e:
-        print("Exception in processar_arquivo:", str(e))
-
-    # Retorna um valor padrão para indicar que ocorreu um erro ao processar o arquivo
-    return None
+        raise Exception("Erro desconhecido ao processar o arquivo PDF.")
 
 @app.route('/api/horarios-vagos', methods=['POST'])
 def horarios_vagos():
@@ -75,9 +82,12 @@ def horarios_vagos():
         dados_alunos = []
 
         for arquivo in arquivos:
-            dados_aluno = processar_arquivo(arquivo)
-            if dados_aluno is not None:
-                dados_alunos.append(dados_aluno)
+            try:
+                dados_aluno = processar_arquivo(arquivo)
+                if dados_aluno is not None:
+                    dados_alunos.append(dados_aluno)
+            except Exception as e:
+                print("Erro ao processar o arquivo:", str(e))
 
         if dados_alunos:
             # Cria o DataFrame para exibir a tabela
