@@ -6,6 +6,7 @@ import re
 import threading
 from werkzeug.utils import secure_filename
 import os
+import logging
 
 app = Flask(__name__)
 CORS(app)
@@ -16,9 +17,27 @@ lock = threading.Lock()
 UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Configurar o objeto de logger
+logger = logging.getLogger('app')
+logger.setLevel(logging.DEBUG)
+
+# Criar um manipulador de arquivo para escrever as mensagens de log em um arquivo
+log_file = 'app.log'
+file_handler = logging.FileHandler(log_file)
+file_handler.setLevel(logging.DEBUG)
+
+# Criar um formato para as mensagens de log
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+file_handler.setFormatter(formatter)
+
+# Adicionar o manipulador de arquivo ao logger
+logger.addHandler(file_handler)
+
+
 @app.route('/')
 def index():
     return 'Hello, world!'
+
 
 def processar_arquivo(arquivo):
     global tabela_horarios_vagos
@@ -65,23 +84,34 @@ def processar_arquivo(arquivo):
 
         return dados_aluno
 
+
 @app.route('/api/horarios-vagos', methods=['POST'])
 def horarios_vagos():
-    arquivos = request.files.getlist('file')
-    dados_alunos = []
+    try:
+        arquivos = request.files.getlist('file')
+        dados_alunos = []
 
-    for arquivo in arquivos:
-        dados_aluno = processar_arquivo(arquivo)
-        if dados_aluno is not None:
-            dados_alunos.append(dados_aluno)
+        for arquivo in arquivos:
+            dados_aluno = processar_arquivo(arquivo)
+            if dados_aluno is not None:
+                dados_alunos.append(dados_aluno)
 
-    df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
-    response = {
-        'DadosAlunos': dados_alunos,
-        'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
-    }
+        df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
+        response = {
+            'DadosAlunos': dados_alunos,
+            'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
+        }
 
-    return jsonify(response)
+        return jsonify(response)
+
+    except Exception as e:
+        logger.exception("Exceção na função horarios_vagos")  # Registrar exceção com traceback completo
+
+        response = {
+            'message': 'Erro ao processar a solicitação.'
+        }
+        return jsonify(response)
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
