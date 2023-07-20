@@ -20,7 +20,6 @@ def index():
 def processar_arquivo(arquivo):
     global tabela_horarios_vagos
     file = arquivo.stream
-    
     try:
         df = tabula.read_pdf(file, pages='all')[0]
         df = df.iloc[:, :-1]
@@ -88,12 +87,12 @@ def horarios_vagos():
 
         # Retorna a resposta como JSON
         resp = jsonify(response)
-        
+
         # Configura os cabeçalhos de resposta para permitir todas as origens (CORS)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Access-Control-Allow-Methods'] = 'POST'
 
-return resp
+        print("--- %s seconds ---" % (time.time() - start_time))
 
         return resp
     except Exception as e:
