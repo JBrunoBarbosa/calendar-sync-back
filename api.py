@@ -67,34 +67,33 @@ def horarios_vagos():
     threads = []
     dados_alunos = []
 
-    for arquivo in arquivos:
-        thread = threading.Thread(target=lambda: dados_alunos.append(processar_arquivo(arquivo)))
-        thread.start()
-        threads.append(thread)
+    try:
+        for arquivo in arquivos:
+            thread = threading.Thread(target=lambda: dados_alunos.append(processar_arquivo(arquivo)))
+            thread.start()
+            threads.append(thread)
 
-    for thread in threads:
-        thread.join()
+        for thread in threads:
+            thread.join()
 
-    # Cria o DataFrame para exibir a tabela
-    df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
+        # Cria o DataFrame para exibir a tabela
+        df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
 
-    # Converte o DataFrame em um dicionário
-    response = {
-        'DadosAlunos': dados_alunos,
-        'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
-    }
+        # Converte o DataFrame em um dicionário
+        response = {
+            'DadosAlunos': dados_alunos,
+            'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
+        }
 
-    # Retorna a resposta como JSON
-    resp = jsonify(response)
+        # Retorna a resposta como JSON
+        resp = jsonify(response)
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+        print("--- %s seconds ---" % (time.time() - start_time))
 
-    return resp
+        return resp
+    except Exception as e:
+        print("Exception in horarios_vagos:", str(e))
 
 if __name__ == '__main__':
     app.debug = True
-    
-    try:
-        app.run(host='0.0.0.0', port=5000)
-    except Exception as e:
-        print("Exception:", str(e))
+    app.run(host='0.0.0.0', port=5000)
