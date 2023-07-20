@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import tabula
 import pandas as pd
 import re
@@ -6,6 +7,7 @@ import time
 import threading
 
 app = Flask(__name__)
+CORS(app)
 app.debug = True
 
 tabela_horarios_vagos = None
@@ -90,10 +92,6 @@ def horarios_vagos():
 
         print("2=============", resp)
 
-        # Configura os cabeçalhos de resposta para permitir todas as origens (CORS)
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = 'POST'
-
         print("--- %s seconds ---" % (time.time() - start_time))
 
         return resp
@@ -101,7 +99,8 @@ def horarios_vagos():
         print("Exception in horarios_vagos:", str(e))
 
     # Retorna uma resposta padrão caso nenhuma outra condição seja atendida
-    return jsonify({'message': 'Erro ao processar a solicitação.'})
+    response = jsonify({'message': 'Erro ao processar a solicitação.'})
+    return response
 
 if __name__ == '__main__':
     app.debug = True
