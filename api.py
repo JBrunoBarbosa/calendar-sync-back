@@ -5,8 +5,6 @@ import pandas as pd
 import re
 import time
 import threading
-import logging
-import sys
 
 app = Flask(__name__)
 CORS(app)
@@ -95,14 +93,4 @@ def horarios_vagos():
 
 if __name__ == '__main__':
     app.debug = True
-    
-    # Configuração do log
-    logger = logging.getLogger('werkzeug')
-    logger.setLevel(logging.ERROR)
-    formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.ERROR)
-    stream_handler.setFormatter(formatter)
-    logger.addHandler(stream_handler)
-    
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000
