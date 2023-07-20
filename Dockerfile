@@ -1,17 +1,20 @@
-# Use uma imagem base Python
-FROM python:3.11.4
+# Imagem base
+FROM python:3.9
 
-# Defina o diretório de trabalho no contêiner
+# Define o diretório de trabalho
 WORKDIR /app
 
-# Instale as dependências
-RUN pip install --upgrade pip
-RUN pip install tabula-py
-RUN pip install flask_cors
-RUN pip install pandas
+# Copia o arquivo requirements.txt para o diretório de trabalho
+COPY requirements.txt .
 
-# Exponha a porta 5000
+# Instala as dependências listadas no requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copia todo o conteúdo do diretório atual para o diretório de trabalho
+COPY . .
+
+# Expõe a porta 5000
 EXPOSE 5000
 
-# Execute o comando para iniciar a API
+# Comando para executar a aplicação
 CMD ["python", "api.py"]
