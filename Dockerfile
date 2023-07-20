@@ -5,6 +5,7 @@ FROM python:3.11.4
 WORKDIR /app
 
 # Instale as dependências
+RUN pip install --upgrade pip
 RUN pip install flask_app
 RUN pip install tabula-py
 RUN pip install flask_cors
