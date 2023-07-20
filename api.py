@@ -12,6 +12,10 @@ CORS(app)
 tabela_horarios_vagos = None
 lock = threading.Lock()
 
+@app.route('/')
+def index():
+    return 'Hello, world!'
+
 def processar_arquivo(arquivo):
     global tabela_horarios_vagos
     file = arquivo.stream
