@@ -20,6 +20,7 @@ def index():
 def processar_arquivo(arquivo):
     global tabela_horarios_vagos
     file = arquivo.stream
+    
     try:
         df = tabula.read_pdf(file, pages='all')[0]
         df = df.iloc[:, :-1]
