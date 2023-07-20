@@ -8,7 +8,7 @@ import threading
 
 app = Flask(__name__)
 CORS(app)
-app.debug = True  
+app.debug = True
 
 tabela_horarios_vagos = None
 lock = threading.Lock()
@@ -67,29 +67,32 @@ def processar_arquivo(arquivo):
 def horarios_vagos():
     start_time = time.time()
 
-    arquivos = request.files.getlist('file')
-    dados_alunos = []
+    try:
+        arquivos = request.files.getlist('file')
+        dados_alunos = []
 
-    for arquivo in arquivos:
-        dados_aluno = processar_arquivo(arquivo)
-        if dados_aluno is not None:
-            dados_alunos.append(dados_aluno)
+        for arquivo in arquivos:
+            dados_aluno = processar_arquivo(arquivo)
+            if dados_aluno is not None:
+                dados_alunos.append(dados_aluno)
 
-    # Cria o DataFrame para exibir a tabela
-    df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
+        # Cria o DataFrame para exibir a tabela
+        df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
 
-    # Converte o DataFrame em um dicionário
-    response = {
-        'DadosAlunos': dados_alunos,
-        'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
-    }
+        # Converte o DataFrame em um dicionário
+        response = {
+            'DadosAlunos': dados_alunos,
+            'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
+        }
 
-    # Retorna a resposta como JSON
-    resp = jsonify(response)
+        # Retorna a resposta como JSON
+        resp = jsonify(response)
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+        print("--- %s seconds ---" % (time.time() - start_time))
 
-    return resp
+        return resp
+    except Exception as e:
+        print("Exception in horarios_vagos:", str(e))
 
 if __name__ == '__main__':
     app.debug = True
