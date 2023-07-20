@@ -10,5 +10,8 @@ RUN pip install tabula-py
 RUN pip install flask_cors
 RUN pip install pandas
 
+# Exponha a porta 5000
+EXPOSE 5000
+
 # Execute o comando para iniciar a API
 CMD ["python", "api.py"]
