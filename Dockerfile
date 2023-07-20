@@ -16,5 +16,8 @@ COPY . .
 # Expõe a porta 5000
 EXPOSE 5000
 
+# Cria a pasta uploads
+RUN mkdir /app/uploads
+
 # Comando para executar a aplicação
 CMD ["python", "api.py"]
