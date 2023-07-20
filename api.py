@@ -1,3 +1,21 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import tabula
+import pandas as pd
+import re
+import time
+import threading
+
+app = Flask(__name__)
+CORS(app)
+
+tabela_horarios_vagos = None
+lock = threading.Lock()
+
+@app.route('/')
+def index():
+    return 'Hello, world!'
+
 def processar_arquivo(arquivo):
     global tabela_horarios_vagos
     file = arquivo.stream
@@ -43,3 +61,35 @@ def processar_arquivo(arquivo):
             return dados_aluno
     except Exception as e:
         print("Exception in processar_arquivo:", str(e))
+
+@app.route('/api/horarios-vagos', methods=['POST'])
+def horarios_vagos():
+    start_time = time.time()
+
+    arquivos = request.files.getlist('file')
+    dados_alunos = []
+
+    for arquivo in arquivos:
+        dados_aluno = processar_arquivo(arquivo)
+        if dados_aluno is not None:
+            dados_alunos.append(dados_aluno)
+
+    # Cria o DataFrame para exibir a tabela
+    df_tabela = pd.DataFrame(list(tabela_horarios_vagos), columns=['Dia', 'Horario'])
+
+    # Converte o DataFrame em um dicionário
+    response = {
+        'DadosAlunos': dados_alunos,
+        'TabelaHorariosVagos': df_tabela.to_dict(orient='records')
+    }
+
+    # Retorna a resposta como JSON
+    resp = jsonify(response)
+
+    print("--- %s seconds ---" % (time.time() - start_time))
+
+    return resp
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run(host='0.0.0.0', port=5000)
