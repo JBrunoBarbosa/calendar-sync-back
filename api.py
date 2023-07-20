@@ -16,7 +16,6 @@ def index():
     return 'Hello, world!'
 
 def processar_arquivo(arquivo):
-    print("1=============")
     global tabela_horarios_vagos
     file = arquivo.stream
     try:
@@ -64,7 +63,6 @@ def processar_arquivo(arquivo):
 
 @app.route('/api/horarios-vagos', methods=['POST'])
 def horarios_vagos():
-    print("2=============")
     start_time = time.time()
 
     try:
@@ -102,7 +100,9 @@ def horarios_vagos():
     except Exception as e:
         print("Exception in horarios_vagos:", str(e))
 
+    # Retorna uma resposta padrão caso nenhuma outra condição seja atendida
+    return jsonify({'message': 'Erro ao processar a solicitação.'})
+
 if __name__ == '__main__':
     app.debug = True
-    print("3=============")
     app.run(host='0.0.0.0', port=5000)
