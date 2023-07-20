@@ -16,6 +16,7 @@ def index():
     return 'Hello, world!'
 
 def processar_arquivo(arquivo):
+    print("1=============")
     global tabela_horarios_vagos
     file = arquivo.stream
     try:
@@ -63,6 +64,7 @@ def processar_arquivo(arquivo):
 
 @app.route('/api/horarios-vagos', methods=['POST'])
 def horarios_vagos():
+    print("2=============")
     start_time = time.time()
 
     try:
@@ -102,4 +104,5 @@ def horarios_vagos():
 
 if __name__ == '__main__':
     app.debug = True
+    print("1=============", response)
     app.run(host='0.0.0.0', port=5000)
