@@ -8,6 +8,7 @@ import threading
 
 app = Flask(__name__)
 CORS(app)
+app.debug = True  
 
 tabela_horarios_vagos = None
 lock = threading.Lock()
