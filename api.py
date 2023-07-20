@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 import tabula
 import pandas as pd
 import re
@@ -7,7 +6,6 @@ import time
 import threading
 
 app = Flask(__name__)
-CORS(app)
 app.debug = True
 
 tabela_horarios_vagos = None
@@ -86,12 +84,12 @@ def horarios_vagos():
         }
 
         print("1=============", response)
-        
+
         # Retorna a resposta como JSON
         resp = jsonify(response)
 
         print("2=============", resp)
-        
+
         # Configura os cabeçalhos de resposta para permitir todas as origens (CORS)
         resp.headers['Access-Control-Allow-Origin'] = '*'
         resp.headers['Access-Control-Allow-Methods'] = 'POST'
@@ -103,5 +101,4 @@ def horarios_vagos():
         print("Exception in horarios_vagos:", str(e))
 
 if __name__ == '__main__':
-    app.debug = True
     app.run(host='0.0.0.0', port=5000)
