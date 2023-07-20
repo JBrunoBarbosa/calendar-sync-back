@@ -1,4 +1,3 @@
-import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import tabula
@@ -6,28 +5,11 @@ import pandas as pd
 import re
 import time
 import threading
+import logging
+import sys
 
 app = Flask(__name__)
 CORS(app)
-
-# Configuração do logger
-logger = logging.getLogger('my_logger')
-logger.setLevel(logging.ERROR)  # Define o nível de log para ERROR
-
-# Cria um manipulador de arquivos para armazenar os logs em um arquivo
-file_handler = logging.FileHandler('app.log')
-file_handler.setLevel(logging.ERROR)
-
-# Define o formato do log
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-file_handler.setFormatter(formatter)
-
-# Adiciona o manipulador de arquivos ao logger
-logger.addHandler(file_handler)
-
-# Configura o logger padrão do Flask para usar o logger personalizado
-app.logger.handlers = logger.handlers
-app.logger.setLevel(logger.level)
 
 tabela_horarios_vagos = None
 lock = threading.Lock()
@@ -39,49 +21,45 @@ def index():
 def processar_arquivo(arquivo):
     global tabela_horarios_vagos
     file = arquivo.stream
-    try:
-        df = tabula.read_pdf(file, pages='all')[0]
-        df = df.iloc[:, :-1]
-        df = df.fillna('')
+    df = tabula.read_pdf(file, pages='all')[0]
+    df = df.iloc[:, :-1]
+    df = df.fillna('')
 
-        # Extrair o texto acima da tabela
-        texto_acima_tabela = tabula.read_pdf(file, pages='all', area=(0, 0, 500, 500))[0]
-        texto_completo = texto_acima_tabela.to_string(index=False, header=False)
+    # Extrair o texto acima da tabela
+    texto_acima_tabela = tabula.read_pdf(file, pages='all', area=(0, 0, 500, 500))[0]
+    texto_completo = texto_acima_tabela.to_string(index=False, header=False)
 
-        # Extrair nome do aluno em caixa alta
-        match_nome = re.search(r"Atestamos que ([A-Z\s]+)", texto_completo)
-        nome_aluno = match_nome.group(1).strip() if match_nome else ""
+    # Extrair nome do aluno em caixa alta
+    match_nome = re.search(r"Atestamos que ([A-Z\s]+)", texto_completo)
+    nome_aluno = match_nome.group(1).strip() if match_nome else ""
 
-        # Extrair curso do aluno em caixa alta
-        match_curso = re.search(r"curso de ([A-Z\s]+)", texto_completo)
-        curso_aluno = match_curso.group(1).strip() if match_curso else ""
+    # Extrair curso do aluno em caixa alta
+    match_curso = re.search(r"curso de ([A-Z\s]+)", texto_completo)
+    curso_aluno = match_curso.group(1).strip() if match_curso else ""
 
-        horarios_vagos = []
-        for indice, linha in df.iterrows():
-            horario = linha.iloc[0]
-            for coluna in df.columns[1:]:
-                dia = coluna.strip()
-                horario_vago = linha[coluna]
-                if not horario_vago:
-                    horarios_vagos.append((dia, horario))
+    horarios_vagos = []
+    for indice, linha in df.iterrows():
+        horario = linha.iloc[0]
+        for coluna in df.columns[1:]:
+            dia = coluna.strip()
+            horario_vago = linha[coluna]
+            if not horario_vago:
+                horarios_vagos.append((dia, horario))
 
-        with lock:
-            global tabela_horarios_vagos
-            if tabela_horarios_vagos is None:
-                tabela_horarios_vagos = set(horarios_vagos)
-            else:
-                tabela_horarios_vagos = tabela_horarios_vagos.intersection(set(horarios_vagos))
+    with lock:
+        global tabela_horarios_vagos
+        if tabela_horarios_vagos is None:
+            tabela_horarios_vagos = set(horarios_vagos)
+        else:
+            tabela_horarios_vagos = tabela_horarios_vagos.intersection(set(horarios_vagos))
 
-            dados_aluno = {
-                'Nome': nome_aluno,
-                'Curso': curso_aluno
-            }
+        dados_aluno = {
+            'Nome': nome_aluno,
+            'Curso': curso_aluno
+        }
 
-            # Retorna o aluno e seus horários vagos
-            return dados_aluno
-    except Exception as e:
-        app.logger.error(str(e))
-        return None
+        # Retorna o aluno e seus horários vagos
+        return dados_aluno
 
 @app.route('/api/horarios-vagos', methods=['POST'])
 def horarios_vagos():
@@ -117,4 +95,14 @@ def horarios_vagos():
 
 if __name__ == '__main__':
     app.debug = True
+    
+    # Configuração do log
+    logger = logging.getLogger('werkzeug')
+    logger.setLevel(logging.ERROR)
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s in %(module)s: %(message)s')
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.ERROR)
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    
     app.run(host='0.0.0.0', port=5000)
