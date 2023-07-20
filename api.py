@@ -13,6 +13,7 @@ tabela_horarios_vagos = None
 lock = threading.Lock()
 
 @app.route('/')
+@CORS(app)
 def index():
     return 'Hello, world!'
 
@@ -60,6 +61,7 @@ def processar_arquivo(arquivo):
         return dados_aluno
 
 @app.route('/api/horarios-vagos', methods=['POST'])
+@CORS(app)
 def horarios_vagos():
     start_time = time.time()
 
